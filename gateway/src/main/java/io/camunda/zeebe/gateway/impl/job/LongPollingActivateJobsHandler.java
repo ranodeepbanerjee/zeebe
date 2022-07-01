@@ -158,21 +158,21 @@ public final class LongPollingActivateJobsHandler implements ActivateJobsHandler
   }
 
   private void onNotification(final String jobType) {
-    LOG.trace("Received jobs available notification for type {}.", jobType);
+    LOG.debug("Received jobs available notification for type {}.", jobType);
 
     // instead of calling #getJobTypeState(), do only a
     // get to avoid the creation of a state instance.
     final var state = jobTypeState.get(jobType);
 
     if (state != null && state.shouldNotifyAndStartNotification()) {
-      LOG.trace("Handle jobs available notification for type {}.", jobType);
+      LOG.debug("Handle jobs available notification for type {}.", jobType);
       actor.run(
           () -> {
             resetFailedAttemptsAndHandlePendingRequests(jobType);
             state.completeNotification();
           });
     } else {
-      LOG.trace("Ignore jobs available notification for type {}.", jobType);
+      LOG.debug("Ignore jobs available notification for type {}.", jobType);
     }
   }
 
@@ -237,7 +237,7 @@ public final class LongPollingActivateJobsHandler implements ActivateJobsHandler
     if (!pendingRequests.isEmpty()) {
       pendingRequests.forEach(
           nextPendingRequest -> {
-            LOG.trace("Unblocking ActivateJobsRequest {}", nextPendingRequest.getRequest());
+            LOG.debug("Unblocking ActivateJobsRequest {}", nextPendingRequest.getRequest());
             activateJobs(nextPendingRequest);
           });
     } else {
@@ -250,7 +250,7 @@ public final class LongPollingActivateJobsHandler implements ActivateJobsHandler
   private void enqueueRequest(
       final InFlightLongPollingActivateJobsRequestsState state,
       final InflightActivateJobsRequest request) {
-    LOG.trace(
+    LOG.debug(
         "Worker '{}' asked for '{}' jobs of type '{}', but none are available. This request will"
             + " be kept open until a new job of this type is created or until timeout of '{}'.",
         request.getWorker(),

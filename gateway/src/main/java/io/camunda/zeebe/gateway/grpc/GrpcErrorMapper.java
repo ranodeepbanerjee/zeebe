@@ -57,7 +57,7 @@ public final class GrpcErrorMapper {
     } else if (error instanceof BrokerRejectionException) {
       final Status status = mapRejectionToStatus(((BrokerRejectionException) error).getRejection());
       builder.mergeFrom(status);
-      logger.trace("Expected to handle gRPC request, but the broker rejected it", rootError);
+      logger.debug("Expected to handle gRPC request, but the broker rejected it", rootError);
     } else if (error instanceof TimeoutException) { // can be thrown by transport
       builder
           .setCode(Code.DEADLINE_EXCEEDED_VALUE)
@@ -88,11 +88,11 @@ public final class GrpcErrorMapper {
       // this error occurs when all partitions have exhausted for requests which have no fixed
       // partitions - it will then also occur when back pressure kicks in, leading to a large burst
       // of error logs that is, in fact, expected
-      logger.trace(
+      logger.debug(
           "Expected to handle gRPC request, but all retries have been exhausted", rootError);
     } else if (error instanceof NoTopologyAvailableException) {
       builder.setCode(Code.UNAVAILABLE_VALUE).setMessage(error.getMessage());
-      logger.trace(
+      logger.debug(
           "Expected to handle gRPC request, but the gateway does not know any partitions yet",
           rootError);
     } else if (error instanceof ConnectTimeoutException) {
@@ -127,12 +127,12 @@ public final class GrpcErrorMapper {
         break;
       case RESOURCE_EXHAUSTED:
         builder.setCode(Code.RESOURCE_EXHAUSTED_VALUE);
-        logger.trace("Target broker is currently overloaded: {}", error, rootError);
+        logger.debug("Target broker is currently overloaded: {}", error, rootError);
         break;
       case PARTITION_LEADER_MISMATCH:
         // return UNAVAILABLE to indicate to the user that retrying might solve the issue, as this
         // is usually a transient issue
-        logger.trace("Target broker was not the leader of the partition: {}", error, rootError);
+        logger.debug("Target broker was not the leader of the partition: {}", error, rootError);
         builder.setCode(Code.UNAVAILABLE_VALUE);
         break;
       default:

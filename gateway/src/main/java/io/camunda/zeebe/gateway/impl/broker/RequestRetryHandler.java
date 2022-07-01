@@ -105,7 +105,7 @@ public final class RequestRetryHandler {
                 if (error == null) {
                   responseConsumer.accept(response.getKey(), response.getResponse());
                 } else if (shouldRetryWithNextPartition(error)) {
-                  Loggers.GATEWAY_LOGGER.trace(
+                  Loggers.GATEWAY_LOGGER.debug(
                       "Failed to create process on partition {}",
                       partitionIdIterator.getCurrentPartitionId(),
                       error);

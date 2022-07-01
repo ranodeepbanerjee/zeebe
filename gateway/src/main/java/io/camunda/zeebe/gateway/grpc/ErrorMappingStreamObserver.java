@@ -130,7 +130,7 @@ public final class ErrorMappingStreamObserver<GrpcResponseT>
   }
 
   private void onCancel() {
-    Loggers.GATEWAY_LOGGER.trace(
+    Loggers.GATEWAY_LOGGER.debug(
         "Attempted to respond to a cancelled call, indicating the client most likely went away");
   }
 }
