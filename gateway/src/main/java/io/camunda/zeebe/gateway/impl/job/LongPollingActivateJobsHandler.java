@@ -158,21 +158,21 @@ public final class LongPollingActivateJobsHandler implements ActivateJobsHandler
   }
 
   private void onNotification(final String jobType) {
-    LOG.debug("Received jobs available notification for type {}.", jobType);
+    LOG.warn("Received jobs available notification for type {}.", jobType);
 
     // instead of calling #getJobTypeState(), do only a
     // get to avoid the creation of a state instance.
     final var state = jobTypeState.get(jobType);
 
     if (state != null && state.shouldNotifyAndStartNotification()) {
-      LOG.debug("Handle jobs available notification for type {}.", jobType);
+      LOG.warn("Handle jobs available notification for type {}.", jobType);
       actor.run(
           () -> {
             resetFailedAttemptsAndHandlePendingRequests(jobType);
             state.completeNotification();
           });
     } else {
-      LOG.debug("Ignore jobs available notification for type {}.", jobType);
+      LOG.warn("Ignore jobs available notification for type {}.", jobType);
     }
   }
 
