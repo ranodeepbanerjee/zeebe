@@ -8,8 +8,11 @@
 package io.camunda.zeebe.broker.engine.impl;
 
 import io.atomix.cluster.messaging.ClusterEventService;
+import io.camunda.zeebe.broker.Loggers;
+import org.slf4j.Logger;
 
 public final class LongPollingJobNotification {
+  private static final Logger LOGGER = Loggers.TRANSPORT_LOGGER;
   private static final String TOPIC = "jobsAvailable";
   private final ClusterEventService eventService;
 
@@ -18,6 +21,7 @@ public final class LongPollingJobNotification {
   }
 
   public void onJobsAvailable(final String jobType) {
+    LOGGER.info("Broadcasting jobsAvailable for {}", jobType);
     eventService.broadcast(TOPIC, jobType);
   }
 }

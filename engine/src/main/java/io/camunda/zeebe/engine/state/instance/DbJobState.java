@@ -344,6 +344,7 @@ public final class DbJobState implements JobState, MutableJobState {
   }
 
   private void notifyJobAvailable(final DirectBuffer jobType) {
+    LOG.info("Notifying jobs available: {}", BufferUtil.bufferAsString(jobType));
     if (onJobsAvailableCallback != null) {
       onJobsAvailableCallback.accept(BufferUtil.bufferAsString(jobType));
     }

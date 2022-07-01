@@ -68,7 +68,7 @@ public final class LongPollingActivateJobsHandler implements ActivateJobsHandler
   }
 
   @Override
-  public void accept(ActorControl actor) {
+  public void accept(final ActorControl actor) {
     this.actor = actor;
     activateJobsHandler.accept(actor);
     onActorStarted();
@@ -281,6 +281,7 @@ public final class LongPollingActivateJobsHandler implements ActivateJobsHandler
           if (state.getLastUpdatedTime() < (now - probeTimeoutMillis)) {
             final InflightActivateJobsRequest probeRequest = state.getNextPendingRequest();
             if (probeRequest != null) {
+              LOG.info("Sending probe for: {}", probeRequest.getType());
               activateJobsUnchecked(state, probeRequest);
             } else {
               // there are no blocked requests, so use next request as probe
