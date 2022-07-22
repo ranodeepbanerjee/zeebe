@@ -17,6 +17,7 @@ import io.camunda.zeebe.model.bpmn.BpmnModelInstance;
 import io.camunda.zeebe.protocol.record.Record;
 import io.camunda.zeebe.protocol.record.intent.ProcessInstanceIntent;
 import io.camunda.zeebe.test.util.record.RecordingExporter;
+import java.io.IOException;
 import java.util.stream.Collectors;
 import org.junit.Rule;
 import org.junit.Test;
@@ -29,7 +30,13 @@ public final class DeploymentClusteredTest {
       Bpmn.createExecutableProcess("process").startEvent().endEvent().done();
 
   public final Timeout testTimeout = Timeout.seconds(120);
-  public final ClusteringRule clusteringRule = new ClusteringRule(3, 1, 3);
+  public final ClusteringRule clusteringRule =
+      new ClusteringRule(
+          3,
+          1,
+          3,
+          brokerCfg ->
+              brokerCfg.getExperimental().getConsistencyChecks().setEnablePreconditions(true));
   public final GrpcClientRule clientRule = new GrpcClientRule(clusteringRule);
 
   @Rule
@@ -89,5 +96,38 @@ public final class DeploymentClusteredTest {
 
     // then
     clientRule.waitUntilDeploymentIsDone(processDefinitionKey);
+  }
+
+  @Test
+  public void shouldRedeployDmn() throws InterruptedException, IOException {
+    // given
+    final var leaderOfPartitionThree = clusteringRule.getLeaderForPartition(2).getNodeId();
+
+    clusteringRule
+        .getBroker(leaderOfPartitionThree)
+        .getBrokerContext()
+        .getBrokerAdminService()
+        .pauseStreamProcessing();
+
+    final DeploymentEvent deploymentEvent =
+        clientRule
+            .getClient()
+            .newDeployResourceCommand()
+            .addResourceFromClasspath("dmn/decision-table.dmn")
+            .send()
+            .join();
+
+    // when
+    Thread.sleep(30_00);
+    clusteringRule
+        .getBroker(leaderOfPartitionThree)
+        .getBrokerContext()
+        .getBrokerAdminService()
+        .resumeStreamProcessing();
+
+    Thread.sleep(30_00);
+
+    // then
+    assert false;
   }
 }

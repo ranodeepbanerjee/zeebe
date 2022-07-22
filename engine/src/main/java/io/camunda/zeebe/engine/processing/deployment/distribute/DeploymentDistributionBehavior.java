@@ -78,21 +78,22 @@ public final class DeploymentDistributionBehavior {
     final var deploymentPushedFuture =
         deploymentDistributor.pushDeploymentToPartition(key, partitionId, copiedDeploymentBuffer);
 
-    deploymentPushedFuture.onComplete(
-        (v, t) ->
-            processingActor.runUntilDone(
-                () -> {
-                  deploymentDistributionRecord.setPartition(partitionId);
-                  commandWriter.reset();
-                  commandWriter.appendFollowUpCommand(
-                      key, DeploymentDistributionIntent.COMPLETE, deploymentDistributionRecord);
-
-                  final long pos = commandWriter.flush();
-                  if (pos < 0) {
-                    processingActor.yieldThread();
-                  } else {
-                    processingActor.done();
-                  }
-                }));
+    //    deploymentPushedFuture.onComplete(
+    //        (v, t) ->
+    //            processingActor.runUntilDone(
+    //                () -> {
+    //                  deploymentDistributionRecord.setPartition(partitionId);
+    //                  commandWriter.reset();
+    //                  commandWriter.appendFollowUpCommand(
+    //                      key, DeploymentDistributionIntent.COMPLETE,
+    // deploymentDistributionRecord);
+    //
+    //                  final long pos = commandWriter.flush();
+    //                  if (pos < 0) {
+    //                    processingActor.yieldThread();
+    //                  } else {
+    //                    processingActor.done();
+    //                  }
+    //                }));
   }
 }

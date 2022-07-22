@@ -31,7 +31,7 @@ import org.slf4j.Logger;
 
 public final class DeploymentDistributorImpl implements DeploymentDistributor {
 
-  public static final Duration PUSH_REQUEST_TIMEOUT = Duration.ofSeconds(15);
+  public static final Duration PUSH_REQUEST_TIMEOUT = Duration.ofSeconds(5);
   public static final Duration RETRY_DELAY = Duration.ofMillis(100);
   private static final Logger LOG = Loggers.PROCESS_REPOSITORY_LOGGER;
   private static final String DEPLOYMENT_PUSH_TOPIC = "deployment";
