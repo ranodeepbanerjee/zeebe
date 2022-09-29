@@ -27,6 +27,11 @@
       <field id="0" name="position" type="uint64" semanticType="long"/>
       <data id="1" name="exporterId" type="varDataEncoding" semanticType="string"/>
     </group>
+    <group id="1" name="buckets">
+      <field id="0" name="sequence" type="uint64" semanticType="long"/>
+      <data id="1" name="valueType" type="varDataEncoding" semanticType="string"/>
+      <data id="2" name="exporterId" type="varDataEncoding" semanticType="string"/>
+    </group>
   </sbe:message>
 
   <sbe:message name="PushDeploymentRequest" id="2">

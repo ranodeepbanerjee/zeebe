@@ -80,28 +80,31 @@ public class ElasticsearchClient {
     client.close();
   }
 
-  public void index(final Record<?> record) {
+  public void index(final Record<?> record, final long sequence) {
     if (metrics == null) {
       metrics = new ElasticsearchMetrics(record.getPartitionId());
     }
 
-    bulk(newIndexCommand(record), record);
+    bulk(newIndexCommand(record), record, sequence);
   }
 
-  public void bulk(final Map<String, Object> command, final Record<?> record) {
+  public void bulk(final Map<String, Object> command, final Record<?> record, final long sequence) {
     final String serializedCommand;
 
     try {
       serializedCommand = MAPPER.writeValueAsString(command);
+      final Map<String, Object> jsonAsMap = MAPPER.readValue(record.toJson(), HashMap.class);
+      final var partition = record.getPartitionId();
+      jsonAsMap.put("sequence", encodePartitionId(partition, sequence));
+      final String jsonCommand = serializedCommand + "\n" + MAPPER.writeValueAsString(jsonAsMap);
+
+      // don't re-append when retrying same record, to avoid OOM
+      if (bulkRequest.isEmpty() || !bulkRequest.get(bulkRequest.size() - 1).equals(jsonCommand)) {
+        bulkRequest.add(jsonCommand);
+      }
     } catch (final IOException e) {
       throw new ElasticsearchExporterException(
           "Failed to serialize bulk request command to JSON", e);
-    }
-
-    final String jsonCommand = serializedCommand + "\n" + record.toJson();
-    // don't re-append when retrying same record, to avoid OOM
-    if (bulkRequest.isEmpty() || !bulkRequest.get(bulkRequest.size() - 1).equals(jsonCommand)) {
-      bulkRequest.add(jsonCommand);
     }
   }
 
@@ -433,5 +436,9 @@ public class ElasticsearchClient {
 
     command.put("index", contents);
     return command;
+  }
+
+  private static long encodePartitionId(final int partitionId, final long sequence) {
+    return ((long) partitionId << 51) + sequence;
   }
 }

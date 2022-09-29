@@ -52,13 +52,13 @@ public class ElasticsearchClientIT extends AbstractElasticsearchExporterIntegrat
             i -> {
               when(recordMock.getKey()).thenReturn(RECORD_KEY + i);
               when(recordMock.toJson()).thenReturn("invalid-json-" + i);
-              client.index(recordMock);
+              client.index(recordMock, 0);
             });
 
     // and one valid record
     when(recordMock.getKey()).thenReturn(RECORD_KEY + bulkSize);
     when(recordMock.toJson()).thenReturn("{}");
-    client.index(recordMock);
+    client.index(recordMock, 0);
 
     // when/then
     assertThatThrownBy(client::flush)
@@ -76,11 +76,11 @@ public class ElasticsearchClientIT extends AbstractElasticsearchExporterIntegrat
     when(recordMock.getKey()).thenReturn(RECORD_KEY + 1);
     when(recordMock.toJson()).thenReturn("{}");
 
-    client.index(recordMock);
+    client.index(recordMock, 0);
     assertThat(bulkRequest).hasSize(1);
 
     // when
-    client.index(recordMock);
+    client.index(recordMock, 0);
 
     // then
     assertThat(bulkRequest).hasSize(1);
@@ -112,14 +112,14 @@ public class ElasticsearchClientIT extends AbstractElasticsearchExporterIntegrat
     when(recordMock.toJson()).thenReturn(jsonRecord.apply(variableValue1));
 
     // when
-    client.index(recordMock);
+    client.index(recordMock, 0);
 
     assertThat(client.shouldFlush()).isFalse();
 
     when(recordMock.getKey()).thenReturn(2L);
     when(recordMock.toJson()).thenReturn(jsonRecord.apply(variableValue2));
 
-    client.index(recordMock);
+    client.index(recordMock, 0);
 
     // then
     assertThat(client.shouldFlush()).isTrue();
